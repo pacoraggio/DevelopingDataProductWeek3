@@ -2,7 +2,9 @@
 title: "Melbourne House Pricing"
 author: "Paolo Coraggio"
 date: "31/01/2020"
-output: html_document
+output: 
+    ioslides_presentation:
+        transition: slower
 ---
 
 ```{r setup, include=FALSE}
@@ -10,24 +12,48 @@ library(plotly)
 library(dplyr)
 library(ggplot2)
 
-knitr::opts_chunk$set(echo = TRUE)
+
+knitr::opts_chunk$set(echo = FALSE)
 ```
 
 ## Introduction
 
-This webpage shows information about House Pricing in Melbourne from 1000 houses randomly sampled from the Melboune House Pricing database from [Intro to Machine Learning](https://www.kaggle.com/learn/intro-to-machine-learning) Kaggle course. The map shows the location of the house and basic information about its price. The house prices are divided in four categories:
+- [Kaggle](https://www.kaggle.com/) is an online community of data scientists and machine learning practitioners that contains different datasets that can be used for training and testing algorithms for Data Analysis
+- `melb_data.csv` is a free available database, from Kaggle, containing information about Melbourne, Australia houses market 
+- The goal of this project is to plot, on the city map, some information about 1000 sampled data from the dataset 
+- The map can be used as basis for futher analysis
 
-- Low Price
-- Medium Low Price
-- Medium High Price
-- High Price
+## Dataset Information
 
-For each house, information about the price, location Council and District and number of rooms are displayed.
-
-## Melbourne House Pricing Map
-
-```{r, echo=FALSE, warning=FALSE, message=FALSE}
+- The dataset size is:
+```{r, echo = FALSE}
 df.mel <- read.csv("./Data/melb_data.csv")
+```
+
+```{r}
+dim(df.mel)
+```
+
+- And contains the following information
+```{r}
+names(df.mel)
+```
+
+## Dataset Transformation
+
+- The dataset has been reduced by deleting all rows that do not contain information about the house longitude and latitude 
+- A further variable has been also added to split the dataset in 4 different prices categories:
+    - Low Price (up to 640000\$)
+    
+    - Medium Low Price (from 640000\$ to  900000\$)
+    - Medium High Price (from 900000\$ to 1320000\$)
+    - High Price (from 1320000\$ to 9000000\$)
+
+- A sample of 1000 houses has been extracted from the original database in order to plot the information on the map
+
+## House Pricing Map
+
+```{r, echo = FALSE, warning=FALSE, message=FALSE}
 df.mel <- df.mel[!(is.na(df.mel$Longtitude)),]
 df.mel$PriceCategory <-cut(df.mel$Price,
                        breaks = quantile(df.mel$Price),
@@ -36,9 +62,7 @@ df.mel$PriceCategory <-cut(df.mel$Price,
 df.mel$MarkerColor <-cut(df.mel$Price,
                      breaks = quantile(df.mel$Price),
                      labels = c("green", "lightgreen", "orange", "red"))
-```
 
-```{r, fig.cap = "Plot of 1000 sampled houses of Melbourne, Australia", fig.width=10.5, echo= FALSE, warning=FALSE, message=FALSE}
 n.sample <- 1000
 df.melsampled <- df.mel[sample(nrow(df.mel), n.sample),]
 
@@ -85,16 +109,15 @@ plot_ly(df.melsampled, type = "scattermapbox") %>%
             center = list(lon = mean(df.melsampled$Longtitude), 
                           lat = mean(df.melsampled$Lattitude)))
     ) 
-    
 ```
 
-## Acknowledgment and details info
+## Acknowledgment
 
-Map generated using `Plotly` library and `OpenStreetMap`.
+- Map generated using `Plotly` library and `OpenStreetMap`.
 
-The dataset is from [Kaggle](https://www.kaggle.com/) organisation.
+- The dataset is from [Kaggle](https://www.kaggle.com/) organisation.
 All code, data and further information are available on GitHub:
 
-[https://github.com/pacoraggio/DevelopingDataProductWeek3](https://github.com/pacoraggio/DevelopingDataProductWeek3)
+    +  [https://github.com/pacoraggio/DevelopingDataProductWeek3](https://github.com/pacoraggio/DevelopingDataProductWeek3)
 
-Please feel free to contact me if you have any suggestion/correction.
+- Please feel free to contact me if you have any suggestion/correction.
