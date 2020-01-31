@@ -1,0 +1,100 @@
+---
+title: "Melbourne House Pricing"
+author: "Paolo Coraggio"
+date: "31/01/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+library(plotly)
+library(dplyr)
+library(ggplot2)
+
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Introduction
+
+This webpage shows information about House Pricing in Melbourne from 1000 houses randomly sampled from the Melboune House Pricing database from [Intro to Machine Learning](https://www.kaggle.com/learn/intro-to-machine-learning) Kaggle course. The map shows the location of the house and basic information about its price. The house prices are divided in four categories:
+
+- Low Price
+- Medium Low Price
+- Medium High Price
+- High Price
+
+For each house information about the price, location district and county and number of rooms are displayed
+
+## Melbourne House Pricing Map
+
+```{r, echo=FALSE, warning=FALSE, message=FALSE}
+df.mel <- read.csv("./Data/melb_data.csv")
+df.mel <- df.mel[!(is.na(df.mel$Longtitude)),]
+df.mel$PriceCategory <-cut(df.mel$Price,
+                       breaks = quantile(df.mel$Price),
+                       labels = c("low", "medium low", "medium high", "high"))
+
+df.mel$MarkerColor <-cut(df.mel$Price,
+                     breaks = quantile(df.mel$Price),
+                     labels = c("green", "lightgreen", "orange", "red"))
+```
+
+Now let's plot the data on a map a sampled number of houses
+
+```{r, fig.width=9.5, echo= FALSE, warning=FALSE, message=FALSE}
+n.sample <- 1000
+df.melsampled <- df.mel[sample(nrow(df.mel), n.sample),]
+
+df.melsampled$HoverText <- with(df.melsampled, 
+                                paste('<b>Price:</b>', Price,
+                                      '<br>', "Council: ", CouncilArea, 
+                                      '<br>', "Region: ", Regionname, 
+                                      '<br>', "Number of Rooms", Rooms))
+
+
+plot_ly(df.melsampled, type = "scattermapbox") %>%
+    add_trace(lat = filter(df.melsampled, PriceCategory == "low")$Lattitude,
+              lon = filter(df.melsampled, PriceCategory == "low")$Longtitude,
+              color = "Low Price",
+              marker = list(color = "darkgreen"),
+              hoverinfo = "text",
+              hovertext = filter(df.melsampled, PriceCategory == "low")$HoverText,
+              mode = "markers")%>%
+    add_trace(lat = filter(df.melsampled, PriceCategory == "medium low")$Lattitude,
+              lon = filter(df.melsampled, PriceCategory == "medium low")$Longtitude,
+              color = "Medium Low Price",
+              marker = list(color = "green"),
+              hoverinfo = "text",
+              hovertext = filter(df.melsampled, PriceCategory == "medium low")$HoverText,
+              mode = "markers") %>%
+    add_trace(lat = filter(df.melsampled, PriceCategory == "medium high")$Lattitude,
+              lon = filter(df.melsampled, PriceCategory == "medium high")$Longtitude,
+              color = "Medium High Price",
+              marker = list(color = "orange"),
+              hovertext = filter(df.melsampled, PriceCategory == "medium high")$HoverText,
+              hoverinfo = "text",
+              mode = "markers")%>%
+    add_trace(lat = filter(df.melsampled, PriceCategory == "high")$Lattitude,
+              lon = filter(df.melsampled, PriceCategory == "high")$Longtitude,
+              color = "High Price",
+              marker = list(color = "red"),
+              hovertext = filter(df.melsampled, PriceCategory == "high")$HoverText,
+              hoverinfo = "text",
+              mode = "markers")%>%
+    layout(
+        mapbox = list(
+            style = 'open-street-map',
+            zoom =9.5,
+            center = list(lon = mean(df.melsampled$Longtitude), 
+                          lat = mean(df.melsampled$Lattitude)))
+    ) 
+    
+```
+
+## Acknowledgment and details info
+
+The dataset is from [Kaggle](https://www.kaggle.com/) organisation.
+All code, data and further information are available on GitHub:
+
+[https://github.com/pacoraggio/DevelopingDataProductWeek3](https://github.com/pacoraggio/DevelopingDataProductWeek3)
+
+Please feel free to contact me if you have any suggestion/correction.
